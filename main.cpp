@@ -6,7 +6,6 @@
 #include<iostream>
 #include<filesystem>
 
-
 using namespace std;
 
 // Utility Func
@@ -48,15 +47,23 @@ vector<string> split(const string& str, const string& delim) {
 
 int main(int argc, char *argv[])
 {
-
     // INPUT :
 	// 1. data directory in data folder
 	// 2. number of txt files
 	// 3. output route
-
     string data_dir = argv[1] + string("/");
 	string query = string(argv[2]);
 	string output = string(argv[3]);
+
+
+	string query,search_command;
+	fstream qr;
+	vector<string> command_string;
+	qr.open("query.txt", ios::in);
+
+	while(getline(qr,search_command)){
+		
+	}
 
 	// Read File & Parser Example
 
