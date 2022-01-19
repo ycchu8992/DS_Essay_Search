@@ -12,25 +12,27 @@ using namespace std;
 
 typedef pair<string, char> PAIR;
 
+typedef pair<bool, pair<TrieNode*,TrieNode*>> data_pair;
+
 int main(int argc, char *argv[])
 {
     string data_dir = argv[1] + string("/");
 	string query = string(argv[2]);
 	string output = string(argv[3]);
- 
-	bool prefix_exist = false;
-	bool suffix_exist = false;
-	bool suffix_need_flag = false;
 
 	string search_command;
 	fstream qr;
 	vector<string> command_string;
 	
-	vector<TrieNode*> trie;
-	vector<TrieNode*> ans;
-	vector<TrieNode*> temp;
+	vector<data_pair> trie_tree;
+
+	vector<string> outputstring;
+
+	read_data(data_dir, trie_tree);
 
 	qr.open("query.txt", ios::in);
+
+	bool suffix_need_flag = false;
 
 	while(getline(qr,search_command)){
 
@@ -38,23 +40,63 @@ int main(int argc, char *argv[])
 		
 		vector<PAIR> command = search_parse(command_string,suffix_need_flag);
 
-		read_data(data_dir, trie);
+		vector<data_pair>::iterator iter;
 
-		ans = trie;
+		int mode = 1;
 
 		for(auto& cmd:command){
-			if(cmd.second == 'E'){
-				for(auto& tree:ans){
-					if(exact_search(tree,cmd.first) == true){
-						temp.push_back(tree);
+			if( ( cmd.second == 'E'|| cmd.second == 'P' ) && mode == 1 ){
+				for(iter = trie_tree.begin(); iter != trie_tree.end();iter++){
+					if( iter->first == false ) continue; 
+					if(trie_search(iter->second.first,cmd.first,cmd.second) == false){
+						iter->first = false;
 					}
 				}
-				ans = temp;
-				temp.clean();
+			}else if( ( cmd.second == 'E'|| cmd.second == 'P' ) && mode == 2 ){
+				for(iter = trie_tree.begin(); iter != trie_tree.end();iter++){
+					if( iter->first == true ) continue;
+					if(trie_search(iter->second.first,cmd.first,cmd.second) == true){
+						iter->first = true;
+					}
+				}
+				mode = 1;
+			}else if( cmd.second == 'S' && mode == 1 ){
+				for(iter = trie_tree.begin(); iter != trie_tree.end();iter++){
+					if( iter->first == false ) continue; 
+					if(trie_search(iter->second.second,cmd.first,cmd.second) == false){
+						iter->first = false;
+					}
+				}
+			}else if( cmd.second == 'S' && mode == 2 ){
+				for(iter = trie_tree.begin(); iter != trie_tree.end();iter++){
+					if( iter->first == true ) continue;
+					if(trie_search(iter->second.second,cmd.first,cmd.second) == true){
+						iter->first = true;
+					}
+				}
+				mode = 1;
 			}
+			else if(cmd.second == 'X' && cmd.first == "+") continue;
+			else if(cmd.second == 'X' && cmd.first == "/") mode = 2;
 		}
-		break;
-	}
 
+		fstream out_put;
+
+		out_put.open(output, ios::out);
+
+		for(auto& ans:trie_tree){
+			if( ans.first == true ) outputstring.push_back(ans.second.first->edge);
+		}
+		out_put.close();
+	}
 	qr.close();
+
+	fstream out_put;
+
+	out_put.open(output, ios::out);
+
+	for(auto& ans:outputstring){
+		out_put << ans << '\n';
+	}
+	out_put.close();
 }

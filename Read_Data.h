@@ -5,12 +5,15 @@
 #include<iostream>
 #include<experimental/filesystem>
 #include<list>
+#include<utility>
 #include"Parse_Split.h"
 #include"Trie.h"
 
 using namespace std;
 
 namespace fs = experimental::filesystem;
+
+typedef pair<bool, pair<TrieNode*,TrieNode*>> data_pair;
 
 bool cmp (const string& str1, const string& str2)
 {
@@ -24,8 +27,7 @@ bool cmp (const string& str1, const string& str2)
   }
 }
 
-
-void read_data(string data_dir, vector<TrieNode*> trie)
+void read_data(string data_dir, vector<data_pair>& trie_tree)
 {
 
     list<string> path_container;
@@ -49,13 +51,18 @@ void read_data(string data_dir, vector<TrieNode*> trie)
 
         vector<string> title = word_parse(tmp_string);
 
-        TrieNode* head = createNode(title_name);
+        TrieNode* head_trie = createNode(title_name);
+
+        TrieNode* head_suffix = createNode(title_name);
 
         for(auto &word : title){
 
             if(word == "") continue;
 
-            addtotree(head,word,0);
+            create_Prefix_Tree(head_trie,word,0);
+
+            create_Suffix_Tree(head_suffix,word,0);
+
         }
 
         while(getline(fi, tmp))
@@ -69,15 +76,19 @@ void read_data(string data_dir, vector<TrieNode*> trie)
                 
                 if(word == "") continue;
 
-                addtotree(head,word,0);
-                
+                create_Prefix_Tree(head_trie,word,0);
+
+                create_Suffix_Tree(head_suffix,word,0);
+
             }
 
 	    }
 
+        data_pair p = make_pair(true,make_pair(head_trie,head_suffix));
+
         fi.close();
 
-        trie.push_back(head);
+        trie_tree.push_back(p);
 
     }
 
