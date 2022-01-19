@@ -6,7 +6,7 @@
 #include<iostream>
 #include<utility>
 #include<experimental/filesystem>
-#include"Read_Data.h"//The file "Parsee_Split.h" is already include in "Read_Data.h"
+#include"Read_Data.hpp"//The file "Parsee_Split.h" is already include in "Read_Data.h"
 
 using namespace std;
 
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
 	read_data(data_dir, trie_tree);
 
-	qr.open("query.txt", ios::in);
+	qr.open(query, ios::in);
 
 	bool suffix_need_flag = false;
 
@@ -80,23 +80,36 @@ int main(int argc, char *argv[])
 			else if(cmd.second == 'X' && cmd.first == "/") mode = 2;
 		}
 
-		fstream out_put;
-
-		out_put.open(output, ios::out);
+		
+		bool is_not_found = true;
 
 		for(auto& ans:trie_tree){
-			if( ans.first == true ) outputstring.push_back(ans.second.first->edge);
+			if( ans.first == true ){
+				outputstring.push_back(ans.second.first->edge);
+				is_not_found = false;
+			}
+			else{
+				ans.first = true;
+			}
 		}
-		out_put.close();
+
+		if( is_not_found == true ){
+			outputstring.push_back("Not Found!");
+		}
+		
+		//outputstring.push_back("\n");
+
 	}
+
 	qr.close();
 
 	fstream out_put;
 
 	out_put.open(output, ios::out);
 
-	for(auto& ans:outputstring){
-		out_put << ans << '\n';
+	for(auto& word:outputstring){
+		out_put << word <<'\n';
 	}
+
 	out_put.close();
 }
